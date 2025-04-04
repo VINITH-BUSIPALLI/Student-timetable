@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Study Planner</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a1f44; /* Dark blue background */
+      color: #FFD700; /* Gold text */
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0a1f44;
+      padding: 10px 20px;
+      border-bottom: 2px solid #FFD700;
+      position: relative;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    /* Reminder Box at Top Left */
+    .reminder {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: #FFD700;
+      color: #0a1f44;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #FFD700;
+      cursor: pointer;
+      position: relative;
+    }
+    /* Profile Dropdown */
+    .profile-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background: #FFD700;
+      color: #0a1f44;
+      padding: 10px;
+      border: 2px solid #0a1f44;
+      border-radius: 10px;
+      width: 200px;
+      z-index: 100;
+    }
+    .profile-dropdown p {
+      margin: 5px 0;
+    }
+    .profile-dropdown button {
+      width: 100%;
+      padding: 5px;
+      background: #0a1f44;
+      color: #FFD700;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .container {
+      padding: 20px;
+    }
+    .search-bar {
+      margin: 10px 0;
+      display: flex;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #FFD700;
+      border-radius: 4px;
+      background: #0a1f44;
+      color: #FFD700;
+    }
+    .search-bar button {
+      padding: 8px 12px;
+      background: #FFD700;
+      color: #0a1f44;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    /* Section Styling */
+    .section {
+      background: #FFD700; /* Gold boxes */
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 2px solid #FFD700;
+      border-radius: 10px;
+      overflow-y: auto;
+      max-height: 300px;
+      color: #0a1f44;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #0a1f44;
+    }
+    .box {
+      border: 1px solid #0a1f44;
+      background: #FFD700;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+      color: #0a1f44;
+    }
+    .add-button {
+      padding: 5px 10px;
+      background: #FFD700;
+      color: #0a1f44;
+      border: 1px solid #0a1f44;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    /* Scrollbar Styles */
+    .section::-webkit-scrollbar {
+      width: 10px;
+    }
+    .section::-webkit-scrollbar-track {
+      background: #0a1f44;
+    }
+    .section::-webkit-scrollbar-thumb {
+      background: #FFD700;
+      border-radius: 5px;
+    }
+    .section::-webkit-scrollbar-thumb:hover {
+      background: #ffc107;
+    }
+    /* Timetable Styles */
+    .timetable {
+      background: #FFD700;
+      padding: 10px;
+      border: 2px solid #FFD700;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      color: #0a1f44;
+    }
+    .timetable table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .timetable th, .timetable td {
+      border: 1px solid #0a1f44;
+      padding: 8px;
+      text-align: left;
+      border-radius: 5px;
+    }
+    .timetable th {
+      background: #0a1f44;
+      color: #FFD700;
+    }
+    .highlight {
+      background: #ffc107;
+    }
+    /* AI Assistant Styles */
+    .ai-assistant {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 300px;
+      background: #FFD700;
+      border: 2px solid #0a1f44;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      padding: 10px;
+      color: #0a1f44;
+    }
+    .ai-assistant header {
+      background: #0a1f44;
+      color: #FFD700;
+      padding: 5px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .ai-assistant .chat {
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 10px 0;
+    }
+    .ai-assistant .input-area {
+      display: flex;
+    }
+    .ai-assistant .input-area input {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #0a1f44;
+      border-radius: 4px;
+      background: #0a1f44;
+      color: #FFD700;
+    }
+    .ai-assistant .input-area button {
+      padding: 5px 10px;
+      background: #0a1f44;
+      color: #FFD700;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    /* Complete Session Button */
+    .complete-btn {
+      padding: 3px 6px;
+      background: #0a1f44;
+      color: #FFD700;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 31, 68, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .modal {
+      background: #FFD700;
+      color: #0a1f44;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+    .modal input, .modal select {
+      width: 100%;
+      margin: 5px 0 10px;
+      padding: 5px;
+      border: 1px solid #0a1f44;
+      border-radius: 5px;
+      background: #fff;
+      color: #0a1f44;
+    }
+    .modal button {
+      padding: 5px 10px;
+      background: #0a1f44;
+      color: #FFD700;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with Title, Reminder and Profile -->
+  <header>
+    <div class="reminder" id="reminder">
+      <!-- Updated dynamically using system date -->
+    </div>
+    <h1>Study Planner</h1>
+    <div class="profile-icon" id="profileIcon" title="Profile"></div>
+    <div class="profile-dropdown" id="profileDropdown">
+      <p><strong>Name:</strong> <span id="studName"></span></p>
+      <p><strong>Class:</strong> <span id="studClass"></span></p>
+      <p><strong>Roll No:</strong> <span id="studRoll"></span></p>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
+  
+  <div class="container">
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search subjects, sessions, deadlines...">
+      <button onclick="searchData()">Search</button>
+    </div>
+    
+    <!-- Timetable Section -->
+    <div class="timetable" id="timetableSection">
+      <h2>Timetable</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Study Sessions</th>
+            <th>Streak Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="rowMonday">
+            <td>Monday</td>
+            <td id="MondayCell"></td>
+            <td id="MondayStreak">0</td>
+          </tr>
+          <tr id="rowTuesday">
+            <td>Tuesday</td>
+            <td id="TuesdayCell"></td>
+            <td id="TuesdayStreak">0</td>
+          </tr>
+          <tr id="rowWednesday">
+            <td>Wednesday</td>
+            <td id="WednesdayCell"></td>
+            <td id="WednesdayStreak">0</td>
+          </tr>
+          <tr id="rowThursday">
+            <td>Thursday</td>
+            <td id="ThursdayCell"></td>
+            <td id="ThursdayStreak">0</td>
+          </tr>
+          <tr id="rowFriday">
+            <td>Friday</td>
+            <td id="FridayCell"></td>
+            <td id="FridayStreak">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Subjects Section -->
+    <div class="section" id="subjectsSection">
+      <h2>Subjects</h2>
+      <button class="add-button" onclick="openModal('subject')">Add Subject</button>
+      <!-- Example subjects -->
+      <div class="box">
+        <p><strong>Subject Name:</strong> Mathematics</p>
+        <p><strong>Credits:</strong> 4</p>
+      </div>
+      <div class="box">
+        <p><strong>Subject Name:</strong> Physics</p>
+        <p><strong>Credits:</strong> 3</p>
+      </div>
+    </div>
+    
+    <!-- Study Sessions Section -->
+    <div class="section" id="sessionsSection">
+      <h2>Study Sessions</h2>
+      <button class="add-button" onclick="openModal('session')">Add Study Session</button>
+      <!-- Example sessions -->
+      <div class="box">
+        <p><strong>Time:</strong> 10:00 AM - 11:30 AM</p>
+        <p><strong>Subject:</strong> Mathematics</p>
+        <p><strong>Syllabus:</strong> Calculus - Integration Techniques</p>
+        <p><strong>Day:</strong> Monday</p>
+        <button class="complete-btn" onclick="completeSession('Monday', this)">Complete Session</button>
+      </div>
+      <div class="box">
+        <p><strong>Time:</strong> 1:00 PM - 2:30 PM</p>
+        <p><strong>Subject:</strong> Physics</p>
+        <p><strong>Syllabus:</strong> Mechanics - Newton's Laws</p>
+        <p><strong>Day:</strong> Tuesday</p>
+        <button class="complete-btn" onclick="completeSession('Tuesday', this)">Complete Session</button>
+      </div>
+    </div>
+    
+    <!-- Deadlines Section -->
+    <div class="section" id="deadlinesSection">
+      <h2>Deadlines</h2>
+      <button class="add-button" onclick="openModal('deadline')">Add Deadline</button>
+      <!-- Example deadlines -->
+      <div class="box">
+        <p><strong>Subject:</strong> Mathematics</p>
+        <p><strong>Date & Time:</strong> 2025-04-10, 5:00 PM</p>
+        <p><strong>Assignment:</strong> Homework on Derivatives</p>
+      </div>
+      <div class="box">
+        <p><strong>Subject:</strong> Physics</p>
+        <p><strong>Date & Time:</strong> 2025-04-12, 3:00 PM</p>
+        <p><strong>Assignment:</strong> Lab Report on Experiments</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- AI Assistant -->
+  <div class="ai-assistant">
+    <header>AI Assistant</header>
+    <div class="chat" id="chatArea">
+      <!-- Chat messages will be displayed here -->
+    </div>
+    <div class="input-area">
+      <input type="text" id="aiInput" placeholder="Ask for help...">
+      <button onclick="askAI()">Send</button>
+    </div>
+  </div>
+  
+  <!-- Modal Overlay for Adding Data -->
+  <div class="modal-overlay" id="modalOverlay">
+    <!-- The modal content will be injected here based on type -->
+    <div class="modal" id="modalContent">
+      <!-- Content changes based on the type of data to add -->
+    </div>
+  </div>
+  
+  <script>
+    // Global student details and streak counts
+    let student = {};
+    const streaks = {
+      Monday: 0,
+      Tuesday: 0,
+      Wednesday: 0,
+      Thursday: 0,
+      Friday: 0
+    };
+
+    // Update reminder using system day and time
+    function updateReminder() {
+      const now = new Date();
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = days[now.getDay()];
+      const dateString = now.toLocaleDateString();
+      const timeString = now.toLocaleTimeString();
+      document.getElementById("reminder").textContent = `Today is ${dayName}, ${dateString} - ${timeString}. Check your schedule!`;
+    }
+    
+    // Highlight current day row in timetable
+    function highlightCurrentDay() {
+      const now = new Date();
+      const days = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const current = days[now.getDay()];
+      // Only highlight Monday-Friday rows
+      if (["Monday","Tuesday","Wednesday","Thursday","Friday"].includes(current)) {
+        const row = document.getElementById("row" + current);
+        if(row) {
+          row.classList.add("highlight");
+        }
+      }
+    }
+    
+    // On page load, ask for student roll number and update reminder and profile
+    window.onload = function() {
+      updateReminder();
+      highlightCurrentDay();
+      const roll = prompt("Please enter your Roll Number:");
+      if (!roll) {
+        alert("Roll Number is required. Reload the page to try again.");
+        return;
+      }
+      // For demo, we use dummy data. In a real app, you'd verify this.
+      student = {
+        roll: roll,
+        name: "Student " + roll,
+        class: "Class 10"
+      };
+      document.getElementById('studName').textContent = student.name;
+      document.getElementById('studClass').textContent = student.class;
+      document.getElementById('studRoll').textContent = student.roll;
+    };
+
+    // Toggle Profile Dropdown
+    document.getElementById('profileIcon').addEventListener('click', function() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+    });
+
+    // Logout function: For demo, just reload the page
+    function logout() {
+      location.reload();
+    }
+
+    // Search functionality to highlight matching boxes
+    function searchData() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const boxes = document.querySelectorAll('.box');
+      boxes.forEach(box => {
+        if(box.textContent.toLowerCase().includes(query)) {
+          box.style.backgroundColor = '#ffc107'; // Highlight (a shade of gold)
+        } else {
+          box.style.backgroundColor = '#FFD700';
+        }
+      });
+    }
+
+    // Open modal based on type (subject, session, deadline)
+    function openModal(type) {
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalContent = document.getElementById("modalContent");
+      modalContent.innerHTML = ""; // Clear previous content
+      
+      if (type === "subject") {
+        modalContent.innerHTML = `
+          <h3>Add Subject</h3>
+          <input type="text" id="subName" placeholder="Subject Name" />
+          <input type="number" id="subCredits" placeholder="Credits" />
+          <button onclick="submitSubject()">Submit</button>
+          <button onclick="closeModal()">Cancel</button>
+        `;
+      } else if (type === "session") {
+        // Use dropdown for day selection and default time input
+        modalContent.innerHTML = `
+          <h3>Add Study Session</h3>
+          <input type="text" id="sessionTime" placeholder="Time (e.g., 10:00 AM - 11:30 AM)" />
+          <input type="text" id="sessionSubject" placeholder="Subject" />
+          <input type="text" id="sessionSyllabus" placeholder="Syllabus" />
+          <select id="sessionDay">
+            <option value="">Select Day</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+          </select>
+          <button onclick="submitSession()">Submit</button>
+          <button onclick="closeModal()">Cancel</button>
+        `;
+      } else if (type === "deadline") {
+        modalContent.innerHTML = `
+          <h3>Add Deadline</h3>
+          <input type="text" id="deadlineSubject" placeholder="Subject" />
+          <input type="datetime-local" id="deadlineDateTime" />
+          <input type="text" id="deadlineAssignment" placeholder="Assignment Details" />
+          <button onclick="submitDeadline()">Submit</button>
+          <button onclick="closeModal()">Cancel</button>
+        `;
+      }
+      modalOverlay.style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("modalOverlay").style.display = "none";
+    }
+
+    // Submit Subject from modal
+    function submitSubject() {
+      const name = document.getElementById("subName").value;
+      const credits = document.getElementById("subCredits").value;
+      if (!name || !credits) {
+        alert("Please fill in all fields.");
+        return;
+      }
+      const newBox = document.createElement('div');
+      newBox.className = 'box';
+      newBox.innerHTML = `<p><strong>Subject Name:</strong> ${name}</p>
+                          <p><strong>Credits:</strong> ${credits}</p>`;
+      document.getElementById('subjectsSection').appendChild(newBox);
+      closeModal();
+    }
+
+    // Submit Study Session from modal
+    function submitSession() {
+      const time = document.getElementById("sessionTime").value;
+      const subject = document.getElementById("sessionSubject").value;
+      const syllabus = document.getElementById("sessionSyllabus").value;
+      const day = document.getElementById("sessionDay").value;
+      if (!time || !subject || !syllabus || !day) {
+        alert("Please fill in all fields.");
+        return;
+      }
+      const newBox = document.createElement('div');
+      newBox.className = 'box';
+      newBox.innerHTML = `<p><strong>Time:</strong> ${time}</p>
+                          <p><strong>Subject:</strong> ${subject}</p>
+                          <p><strong>Syllabus:</strong> ${syllabus}</p>
+                          <p><strong>Day:</strong> ${day}</p>
+                          <button class="complete-btn" onclick="completeSession('${day}', this)">Complete Session</button>`;
+      document.getElementById('sessionsSection').appendChild(newBox);
+      updateTimetable(day, time, subject);
+      closeModal();
+    }
+
+    // Submit Deadline from modal
+    function submitDeadline() {
+      const subject = document.getElementById("deadlineSubject").value;
+      const dateTime = document.getElementById("deadlineDateTime").value;
+      const assignment = document.getElementById("deadlineAssignment").value;
+      if (!subject || !dateTime || !assignment) {
+        alert("Please fill in all fields.");
+        return;
+      }
+      // Format dateTime nicely (for demo purposes, we use the value as is)
+      const newBox = document.createElement('div');
+      newBox.className = 'box';
+      newBox.innerHTML = `<p><strong>Subject:</strong> ${subject}</p>
+                          <p><strong>Date & Time:</strong> ${dateTime}</p>
+                          <p><strong>Assignment:</strong> ${assignment}</p>`;
+      document.getElementById('deadlinesSection').appendChild(newBox);
+      closeModal();
+    }
+
+    // Update the timetable for the given day
+    function updateTimetable(day, time, subject) {
+      const dayFormatted = day.trim().charAt(0).toUpperCase() + day.trim().slice(1).toLowerCase();
+      const cell = document.getElementById(dayFormatted + "Cell");
+      if (cell) {
+        const sessionInfo = `<div>${time} - ${subject}</div>`;
+        cell.innerHTML += sessionInfo;
+      } else {
+        alert("Invalid day entered. Please use Monday-Friday.");
+      }
+    }
+
+    // Mark a session as complete and update streak count
+    function completeSession(day, btn) {
+      const dayFormatted = day.trim().charAt(0).toUpperCase() + day.trim().slice(1).toLowerCase();
+      streaks[dayFormatted] += 1;
+      document.getElementById(dayFormatted + "Streak").textContent = streaks[dayFormatted];
+      btn.disabled = true;
+      btn.textContent = "Completed";
+    }
+
+    // Placeholder function for the AI Assistant
+    function askAI() {
+      const input = document.getElementById('aiInput').value;
+      const chatArea = document.getElementById('chatArea');
+      const message = document.createElement('p');
+      message.textContent = "You asked: " + input + " (AI response would be generated here)";
+      chatArea.appendChild(message);
+      document.getElementById('aiInput').value = '';
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+    
+    // Update reminder every minute
+    setInterval(updateReminder, 60000);
+  </script>
+</body>
+</html>
